@@ -3,3 +3,4 @@ Django==1.8
 mechanize==0.2.5
 psycopg2==2.5.4
 dj-database-url
+whitenoise
