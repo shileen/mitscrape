@@ -1,0 +1,35 @@
+{% extends 'scrape/base.html' %}
+
+{% block title %}Home{% endblock %}
+
+  {% block body_block %}
+  <div class="hero-unit">
+
+    <div class="container">
+        {% if registered %}
+        <p> thank you for registering!</p>
+        {% else %}
+        <form id="user_form" method="post" action="{% url 'scrape:register' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <h2 class="form-signin-heading">Sign Up Here</h2>
+            <!-- Display each form here -->
+
+            {% for field in user_form.visible_fields %}
+            {{ field.errors }}
+            {{ field.help_text }}<br />
+            {{ field }}<br />
+            {% endfor %}
+
+            {% for field in profile_form.visible_fields %}
+            {{ field.errors }}
+            {{ field.help_text }}<br />
+            {{ field }}<br />
+            {% endfor %}
+
+            <br />
+            <input class="btn btn-primary" type="submit" name="submit" value="Register" />
+        </form>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

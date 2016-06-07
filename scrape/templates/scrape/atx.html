@@ -1,0 +1,49 @@
+{% extends 'scrape/base.html' %}
+
+{% block title %}Home{% endblock %}
+{% block body_block %}
+<div class="hero-unit">
+
+{% if user.is_authenticated %}
+  {% if atx %}
+<font class="small">
+    <table class="table table-bordered table-hover" style="font-size:80%"  >
+      <caption>
+        <strong>Hi, {{user.username}} Your Attendance is</strong>
+      </caption>
+      <thead>
+      <tr>
+         <th>Course Code</th>
+         <th>Name</th>
+         <th>Classes</th>
+         <th>Attended</th>
+         <th>Absent</th>
+         <th>Percent</th>
+         <th>Updated</th>
+      </tr>
+    </thead>
+      {% for at in atx %}
+      <tr>
+      <td>{{at.course_code}}</td>
+      <td>{{at.name}}</td>
+      <td>{{at.classes}}</td>
+      <td>{{at.attended}}</td>
+      <td>{{at.absent}}</td>
+      <td>{{at.percent}}</td>
+      <td>{{at.updated}}</td>
+      </tr>
+      {% endfor %}
+    </table>
+
+
+    </div>
+
+    {% else %}
+    <p class="lead">Hi, {{user.username}} There is no Attendance stored for your account, press the <strong>Get Attendance</strong> button to get your latest attendance.</p>
+  {% endif %}
+
+
+{% endif %}
+</div>
+
+{% endblock %}
