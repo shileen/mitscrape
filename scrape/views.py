@@ -69,7 +69,7 @@ def user_login(request):
         if user:
             if user.is_active:
                 login(request, user)
-                return HttpResponseRedirect('/scrape/')
+                return HttpResponseRedirect('/scrape/atd')
             else:
                 context_dict['disabled_account'] = True
                 return render(request, 'scrape/login.html', context_dict)
