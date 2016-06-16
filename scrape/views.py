@@ -91,8 +91,11 @@ def user_logout(request):
 
 @login_required
 def get_atd(request):
+    context_dict = []
+    context_dict['failure'] = False
     user = request.user
-    up=UserProfile.objects.get(user=user)
+    up = UserProfile.objects.get(user=user)
+
     reload(sys)
     sys.setdefaultencoding("utf8")
 
@@ -114,62 +117,67 @@ def get_atd(request):
     br.addheaders = [('User-agent', 'Chrome')]
     reg = up.regno
     bd = up.dob
-    pg = br.open('http://websismit.manipal.edu/')
+    try:
+        pg = br.open('http://websismit.manipal.edu/')
 
-    br.select_form(name='loginform')
+        br.select_form(name='loginform')
 
-    # user Credentials
-    br.form['idValue'] = reg
-    br.form['birthDate_i18n'] = bd
-    br.form['birthDate'] = bd
-    br.submit()
+        # user Credentials
+        br.form['idValue'] = reg
+        br.form['birthDate_i18n'] = bd
+        br.form['birthDate'] = bd
+        br.submit()
 
-    response = br.response()
-    # print response.info()
-    for link in br.links():
-        if link.text == 'Academic Status':
-            lk = link
-            break
-    for link in br.links():
-        if link.text == 'EXIT':
-            logout = link
-            break
+        response = br.response()
+        # print response.info()
+        for link in br.links():
+            if link.text == 'Academic Status':
+                lk = link
+                break
+        for link in br.links():
+            if link.text == 'EXIT':
+                logout = link
+                break
 
-    # print lk.text
-    reqs = br.click_link(lk)
-    resp = br.follow_link(lk)
-    soup = BS(resp.read())
+        # print lk.text
+        reqs = br.click_link(lk)
+        resp = br.follow_link(lk)
+        soup = BS(resp.read())
 
-    als = soup.findAll('a')
-    for al in als:
-        if al.get('title') == 'Latest Enrollment':
-            ur = al.get('href')
-    br.find_link(url=ur)
-    req = br.click_link(url=ur)
-    res = br.open(req)
-    soup = BS(res.read())
+        als = soup.findAll('a')
+        for al in als:
+            if al.get('title') == 'Latest Enrollment':
+                ur = al.get('href')
+        br.find_link(url=ur)
+        req = br.click_link(url=ur)
+        res = br.open(req)
+        soup = BS(res.read())
 
-    table = soup.find('table', id='ListAttendanceSummary_table')
-    rows = table.findAll('tr')
-    data = [[td.findChildren(text=True)
-             for td in tr.findAll("td")] for tr in rows]
-    data = [[u"".join(d).strip() for d in l] for l in data]
-    iterdata = iter(data)
-    next(iterdata)
-    for d in iterdata:
-        try:
-            a = Attendance.objects.get(user=user, name=d[1])
-        except Attendance.DoesNotExist:
-            a=None
-            pass
-        if a:
-            a.classes=d[2]
-            a.attended=d[3]
-            a.absent=d[4]
-            a.percent=d[5]
-            a.updated=d[6]
-        else:
-            a = Attendance(user=user, course_code=d[0], name=d[1], classes=d[
-                           2], attended=d[3], absent=d[4], percent=d[5], updated=d[6])
-        a.save()
-    return HttpResponseRedirect('/scrape/atx')
+        table = soup.find('table', id='ListAttendanceSummary_table')
+        rows = table.findAll('tr')
+        data = [[td.findChildren(text=True)
+                 for td in tr.findAll("td")] for tr in rows]
+        data = [[u"".join(d).strip() for d in l] for l in data]
+        iterdata = iter(data)
+        next(iterdata)
+        for d in iterdata:
+            try:
+                a = Attendance.objects.get(user=user, name=d[1])
+            except Attendance.DoesNotExist:
+                a = None
+                pass
+            if a:
+                a.classes = d[2]
+                a.attended = d[3]
+                a.absent = d[4]
+                a.percent = d[5]
+                a.updated = d[6]
+            else:
+                a = Attendance(user=user, course_code=d[0], name=d[1], classes=d[
+                               2], attended=d[3], absent=d[4], percent=d[5], updated=d[6])
+            a.save()
+        return HttpResponseRedirect('/scrape/atx')
+
+    except (mechanize.HTTPError,mechanize.URLError):
+        context_dict['failure'] = True
+        return render(request, 'scrape/login.html', context_dict)
