@@ -2,3 +2,6 @@
 db.sqlite3
 __pychache__
 local_settings.py
+*.log
+*.pot
+
