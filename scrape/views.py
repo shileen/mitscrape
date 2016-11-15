@@ -91,7 +91,7 @@ def user_logout(request):
 
 @login_required
 def get_atd(request):
-    context_dict = []
+    context_dict = {}
     context_dict['failure'] = False
     user = request.user
     up = UserProfile.objects.get(user=user)
